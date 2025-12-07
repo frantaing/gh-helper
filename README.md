@@ -23,7 +23,7 @@ cd gh-helper
 chmod +x gh-helper.sh
 
 # Optional: add to your PATH
-sudo ln -s "$(pwd)/gh-helper.sh" /usr/local/bin/gh-helper
+sudo ln -s "$PWD/gh-helper.sh" /usr/local/bin/gh-helper
 ```
 
 ## Usage
