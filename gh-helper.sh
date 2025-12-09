@@ -16,6 +16,11 @@ COLOR_RED="#f85149"
 COLOR_PURPLE="#a371f7"
 COLOR_BORDER="#484f58"
 
+# --- Get the feature modules ---
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+source "$SCRIPT_DIR/modules/deployment_cleanup.sh"
+# Add future modules here...
+
 # --- FUNCTION: Dependency Checker ---
 # Checks for required tools and offers to install them if missing.
 check_dependencies() {
@@ -61,7 +66,7 @@ display_welcome() {
     local title
     title=$(gum style --foreground "$COLOR_BLUE" "gh-helper")
 
-    local subtitle="A TUI for GitHub power-users."
+    local subtitle="A TUI for doing Github things the website won't let you do."
 
     gum style \
         --border double --border-foreground "$COLOR_BORDER" \
@@ -70,17 +75,6 @@ display_welcome() {
         "$subtitle"
 
     echo "" # Add a newline for spacing
-}
-
-# --- Feature Functions (Placeholders) ---
-run_deployment_cleanup() {
-    gum spin --spinner dot --title "Launching Deployment Cleanup..." -- sleep 2
-    gum style --foreground "$COLOR_GREEN" "Deployment Cleanup module loaded."
-    
-    # TODO: Implement the actual logic here
-    #       Or better yet, another script...
-    echo "This feature is under construction. Press any key to return to the menu."
-    read -n 1
 }
 
 # --- FUNCTION: Main Menu ---
