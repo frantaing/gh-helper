@@ -11,7 +11,10 @@ run_deployment_cleanup() {
     # --- 1: Get the repo ---
     local REPO_NAME
     while true; do
-        REPO_NAME=$(gum input --placeholder "owner/repo" --prompt "Enter the repository to clean: ")
+        REPO_NAME=$(gum input --placeholder "owner/repo" \
+            --prompt.bold \
+            --prompt "Enter the repository to clean: " \
+            --cursor.foreground "$COLOR_BLUE")
 
         if [ -z "$REPO_NAME" ]; then clear; return; fi
 
@@ -26,7 +29,7 @@ run_deployment_cleanup() {
     local get_envs_cmd="gh api 'repos/$REPO_NAME/environments' --jq '.environments.[].name' 2>/dev/null || true"
     
     local ENV_NAMES
-    ENV_NAMES=$(gum spin --spinner dot --title "Fetching environments for $REPO_NAME..." -- bash -c "$get_envs_cmd")
+    ENV_NAMES=$(gum spin --spinner.foreground "$COLOR_BLUE" --spinner dot --title "Fetching environments for $REPO_NAME..." -- bash -c "$get_envs_cmd")
 
     if [ -z "$ENV_NAMES" ]; then
         gum style --foreground "$COLOR_RED" "No environments with deployment history found for '$REPO_NAME'."
@@ -36,7 +39,12 @@ run_deployment_cleanup() {
     fi
 
     local ENV_NAME
-    ENV_NAME=$(echo "$ENV_NAMES" | gum choose --header "Select an environment to clean")
+    ENV_NAME=$(echo "$ENV_NAMES" | gum choose \
+        --header "Select an environment to clean" \
+        --header.bold \
+        --header.foreground "" \
+        --cursor.foreground "$COLOR_BLUE" \
+        --selected.foreground "$COLOR_BLUE")
 
     if [ -z "$ENV_NAME" ]; then clear; return; fi
 
@@ -44,25 +52,14 @@ run_deployment_cleanup() {
     local get_deployments_cmd="gh api 'repos/$REPO_NAME/deployments?per_page=100' --paginate --jq '.[] | select(.environment == \"$ENV_NAME\") | {id: .id, env: .environment, creator: .creator.login, created: .created_at}' 2>/dev/null || true"
 
     local DEPLOYMENTS_JSON
-    DEPLOYMENTS_JSON=$(gum spin --spinner dot --title "Fetching deployments in '$ENV_NAME'..." -- bash -c "$get_deployments_cmd")
-    
-    if [ -z "$DEPLOYMENTS_JSON" ]; then
-        gum style --foreground "$COLOR_GREEN" "The '$ENV_NAME' environment has no deployments to clean."
-        sleep 3
-        clear
-        return
-    fi
-    
-    # Get just the IDs for deletion
-    local DEPLOYMENT_IDS
-    DEPLOYMENT_IDS=$(echo "$DEPLOYMENTS_JSON" | jq -r '.id')
+    DEPLOYMENTS_JSON=$(gum spin --spinner.foreground "$COLOR_BLUE" --spinner dot --title "Fetching deployments in '$ENV_NAME'..." -- bash -c "$get_deployments_cmd")
     
     local DEPLOYMENT_COUNT
     DEPLOYMENT_COUNT=$(echo "$DEPLOYMENT_IDS" | grep -c . || echo "0")
 
     # --- 3.5: Show deployments ---
     echo
-    gum style --bold --foreground "$COLOR_PURPLE" "Found $DEPLOYMENT_COUNT deployment(s) in '$ENV_NAME':"
+    gum style --bold --foreground "$COLOR_GREEN" "Found $DEPLOYMENT_COUNT deployment(s) in '$ENV_NAME':"
     echo
     
     # Display in a nice table format
@@ -70,14 +67,16 @@ run_deployment_cleanup() {
     echo
 
     # --- 4: Show action menu ---
-    gum style --bold "What would you like to do?"
-    
     local action
     action=$(gum choose \
         "Delete ALL deployments" \
         "Delete specific deployments (select)" \
         "Cancel" \
-        --cursor.foreground "$COLOR_BLUE")
+        --header "What would you like to do?" \
+        --header.bold \
+        --header.foreground "" \
+        --cursor.foreground "$COLOR_BLUE" \
+        --selected.foreground "$COLOR_BLUE")
     
     if [ "$action" = "Cancel" ]; then
         clear
@@ -106,7 +105,10 @@ run_deployment_cleanup() {
         
         # Let user select multiple deployments
         local selected_deployments
-        selected_deployments=$(echo "$deployment_options" | gum choose --no-limit --cursor.foreground "$COLOR_BLUE")
+        selected_deployments=$(echo "$deployment_options" | gum choose --no-limit \
+            --header "$selection_header" \
+            --cursor.foreground "$COLOR_BLUE" \
+            --selected.foreground "$COLOR_BLUE")
         
         if [ -z "$selected_deployments" ]; then
             gum style --foreground "$COLOR_BLUE" "No deployments selected."
@@ -126,14 +128,18 @@ run_deployment_cleanup() {
 
     # --- 6: CONFIRM DELETION ---
     echo
-    if ! gum confirm "You are about to PERMANENTLY delete ${SELECTED_COUNT} deployment(s) from the \"${ENV_NAME}\" environment. Proceed?"; then
+    if ! gum confirm "You are about to PERMANENTLY delete ${SELECTED_COUNT} deployment(s) from the \"${ENV_NAME}\" environment. Proceed?" \
+        --prompt.bold \
+        --prompt.foreground "" \
+        --selected.background "$COLOR_BLUE" \
+        --selected.foreground "#FFFFFF"; then
         clear
         return
     fi
 
     # --- 7: Deletion loop ---
     clear
-    gum style --bold --foreground "$COLOR_PURPLE" -- "--- Starting Deletion Process ---"
+    gum style --bold --foreground "$COLOR_BLUE" -- "--- Starting Deletion Process ---"
     echo
 
     # !!! Temporarily disable 'set -e' for this section
@@ -186,9 +192,13 @@ run_deployment_cleanup() {
     set -e
 
     echo
+    local line1="✨ Process Complete! ✨"
+    local line2
+    line2=$(gum style --foreground "$COLOR_GREEN" "Deleted ${deleted_count} of ${SELECTED_COUNT} deployments from the '${ENV_NAME}' environment.")
+    
     gum style --padding "1 2" --border normal --border-foreground "$COLOR_GREEN" \
-        "✨ Process Complete! ✨" \
-        "Deleted ${deleted_count} of ${SELECTED_COUNT} deployments from the '${ENV_NAME}' environment."
+        "$line1" \
+        "$line2"
 
     echo
     echo "(Press any key to return to the main menu.)"
