@@ -124,7 +124,7 @@ main() {
     check_dependencies
 
     # 3: Check if the user is authenticated with gh
-    # 4.5: If not, => `gh auth login`
+    # 3.5: If not, => `gh auth login`
     if ! gh auth status &>/dev/null; then
         gum style --border normal --border-foreground "$COLOR_RED" --padding "1 2" \
             "You are not authenticated with the GitHub CLI."
