@@ -4,7 +4,7 @@ A TUI for managing GitHub repos from your terminal. Because some things just are
 
 ## Roadmap
 
-- [ ] Deployment cleanup
+- [x] Deployment cleanup
 - [ ] Actions cache management
 - [ ] Bulk workflow run cleanup
 - [ ] Stale branch pruning (across multiple repos)
