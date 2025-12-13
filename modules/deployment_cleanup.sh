@@ -58,7 +58,7 @@ run_deployment_cleanup() {
         # Check if deployments exist
         if [ -z "$DEPLOYMENTS_JSON" ] || [ "$DEPLOYMENTS_JSON" = "null" ]; then
             echo
-            gum style --padding "1 2" --border normal --border-foreground "#f8e45c" \
+            gum style --padding "1 2" --border normal --border-foreground "$COLOR_BLUE" \
                 "No deployments found in the '$ENV_NAME' environment." \
                 "Please select a different environment."
             echo
@@ -106,7 +106,7 @@ run_deployment_cleanup() {
             continue
         fi
         
-        # If we have deployments, break out of the loop
+        # If deployments exist, break out of the loop
         break
     done
 
