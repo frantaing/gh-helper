@@ -19,6 +19,7 @@ COLOR_BORDER="#484f58"
 # --- Get the feature modules ---
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 source "$SCRIPT_DIR/modules/deployment_cleanup.sh"
+source "$SCRIPT_DIR/modules/actions_cache.sh"
 # Add future modules here...
 
 # --- FUNCTION: Dependency Checker ---
@@ -84,7 +85,7 @@ display_main_menu() {
     local choice
     choice=$(gum choose \
         "Deployment Cleanup" \
-        "Actions Cache Management (coming soon)" \
+        "Actions Cache Management" \
         "Bulk Workflow Run Cleanup (coming soon)" \
         "Stale Branch Pruning (coming soon)" \
         "Quit" \
@@ -97,9 +98,8 @@ display_main_menu() {
         "Deployment Cleanup")
             run_deployment_cleanup
             ;;
-        "Actions Cache Management (coming soon)")
-            gum style --foreground "$COLOR_BLUE" "This feature is planned! Check back later."
-            sleep 2
+        "Actions Cache Management")
+            run_actions_cache
             ;;
         "Bulk Workflow Run Cleanup (coming soon)")
             gum style --foreground "$COLOR_BLUE" "This feature is planned! Check back later."
@@ -117,14 +117,19 @@ display_main_menu() {
 }
 
 # --- Main ---
+#
+#   1. Clears the screen first
+#   2. Checks if all required tools are installed
+#   3. Checks if the user is authenticated with gh
+#       3.5. If not, => `gh auth login`
+#   4. Once logged in, show welcome screen
+#   5. Loop the main menu until user quits
+#
 main() {
-    clear # 1: Clear the screen first
+    clear
     
-    # 2: Check if all required tools are installed
     check_dependencies
 
-    # 3: Check if the user is authenticated with gh
-    # 3.5: If not, => `gh auth login`
     if ! gh auth status &>/dev/null; then
         gum style --border normal --border-foreground "$COLOR_RED" --padding "1 2" \
             "You are not authenticated with the GitHub CLI."
@@ -136,14 +141,11 @@ main() {
         fi
     fi
 
-    # 4: Show welcome screen
     display_welcome
 
-    # 5: Loop the main menu until the user quits
     while true; do
         display_main_menu
     done
 }
 
-# Run the main function
 main

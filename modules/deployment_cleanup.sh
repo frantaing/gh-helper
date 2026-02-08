@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # --- MODULE: Deployment Cleanup ---
-# Contains all logic for the deployment cleanup feature.
+# View and delete Github deployments.
 
 run_deployment_cleanup() {
     clear
