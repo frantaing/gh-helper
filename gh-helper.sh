@@ -38,7 +38,12 @@ check_dependencies() {
         gum style --border normal --border-foreground "$COLOR_RED" --padding "1 2" \
             "Warning: Required tools are missing: ${missing_deps[*]}"
 
-        if gum confirm "Would you like to try and install them now?"; then
+        # --- UPDATED COLORS HERE ---
+        if gum confirm "Would you like to try and install them now?" \
+            --prompt.foreground "$COLOR_BLUE" \
+            --selected.background "$COLOR_BLUE" \
+            --selected.foreground "#FFFFFF"; then
+            
             # Detect package manager
             if command -v pacman &> /dev/null; then
                 sudo pacman -S "${missing_deps[@]}"
@@ -50,7 +55,7 @@ check_dependencies() {
                 brew install "${missing_deps[@]}"
             else
                 gum style --foreground "$COLOR_RED" "Could not detect a supported package manager (apt, dnf, pacman, brew)."
-                echo "Please install the following manually: ${missing_deps[*]}"
+                echo "Please install manually: ${missing_deps[*]}"
                 exit 1
             fi
             # Re-check after installation attempt
@@ -80,7 +85,8 @@ display_welcome() {
 
 # --- FUNCTION: Main Menu ---
 display_main_menu() {
-    gum style --bold "What would you like to do?"
+    local header_text
+    header_text=$(gum style --bold "What would you like to do?")
 
     local choice
     choice=$(gum choose \
@@ -126,14 +132,19 @@ display_main_menu() {
 #   5. Loop the main menu until user quits
 #
 main() {
-    clear
+    clear 
     
     check_dependencies
 
     if ! gh auth status &>/dev/null; then
         gum style --border normal --border-foreground "$COLOR_RED" --padding "1 2" \
             "You are not authenticated with the GitHub CLI."
-        if gum confirm "Would you like to run 'gh auth login' now?"; then
+        
+        # --- UPDATED COLORS HERE ---
+        if gum confirm "Would you like to run 'gh auth login' now?" \
+            --prompt.foreground "$COLOR_BLUE" \
+            --selected.background "$COLOR_BLUE" \
+            --selected.foreground "#FFFFFF"; then
             gh auth login
         else
             echo "Authentication is required to use gh-helper."
