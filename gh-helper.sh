@@ -93,7 +93,7 @@ display_main_menu() {
     choice=$(gum choose \
         "Deployment Cleanup" \
         "Actions Cache Management" \
-        "Bulk Workflow Run Cleanup (coming soon)" \
+        "Bulk Workflow Run Cleanup" \
         "Stale Branch Pruning (coming soon)" \
         "Quit" \
         --height 10 \
@@ -108,9 +108,8 @@ display_main_menu() {
         "Actions Cache Management")
             run_actions_cache
             ;;
-        "Bulk Workflow Run Cleanup (coming soon)")
-            gum style --foreground "$COLOR_BLUE" "This feature is planned! Check back later."
-            sleep 2
+        "Bulk Workflow Run Cleanup")
+            run_workflow_cleanup
             ;;
         "Stale Branch Pruning (coming soon)")
             gum style --foreground "$COLOR_BLUE" "This feature is planned! Check back later."
