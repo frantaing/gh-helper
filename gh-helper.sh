@@ -20,6 +20,7 @@ COLOR_BORDER="#484f58"
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 source "$SCRIPT_DIR/modules/deployment_cleanup.sh"
 source "$SCRIPT_DIR/modules/actions_cache.sh"
+source "$SCRIPT_DIR/modules/workflow_cleanup.sh"
 # Add future modules here...
 
 # --- FUNCTION: Dependency Checker ---
