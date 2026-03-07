@@ -6,7 +6,7 @@ A TUI for managing GitHub repos from your terminal. Because some things just are
 
 - [x] Deployment cleanup
 - [x] Actions cache management
-- [ ] Bulk workflow run cleanup
+- [x] Bulk workflow run cleanup
 - [ ] Stale branch pruning (across multiple repos)
 
 ## Installation
