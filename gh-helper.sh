@@ -87,7 +87,7 @@ display_welcome() {
 # --- FUNCTION: Main Menu ---
 display_main_menu() {
     local header_text
-    header_text=$(gum style --bold "What would you like to do?")
+    header_text=$(gum style --bold --foreground "$COLOR_BLUE" "What would you like to do?")
 
     local choice
     choice=$(gum choose \
