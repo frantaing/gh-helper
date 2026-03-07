@@ -20,6 +20,7 @@ COLOR_BORDER="#484f58"
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 source "$SCRIPT_DIR/modules/deployment_cleanup.sh"
 source "$SCRIPT_DIR/modules/actions_cache.sh"
+source "$SCRIPT_DIR/modules/workflow_cleanup.sh"
 # Add future modules here...
 
 # --- FUNCTION: Dependency Checker ---
@@ -86,13 +87,13 @@ display_welcome() {
 # --- FUNCTION: Main Menu ---
 display_main_menu() {
     local header_text
-    header_text=$(gum style --bold "What would you like to do?")
+    header_text=$(gum style --bold --foreground "$COLOR_BLUE" "What would you like to do?")
 
     local choice
     choice=$(gum choose \
         "Deployment Cleanup" \
         "Actions Cache Management" \
-        "Bulk Workflow Run Cleanup (coming soon)" \
+        "Bulk Workflow Run Cleanup" \
         "Stale Branch Pruning (coming soon)" \
         "Quit" \
         --height 10 \
@@ -107,9 +108,8 @@ display_main_menu() {
         "Actions Cache Management")
             run_actions_cache
             ;;
-        "Bulk Workflow Run Cleanup (coming soon)")
-            gum style --foreground "$COLOR_BLUE" "This feature is planned! Check back later."
-            sleep 2
+        "Bulk Workflow Run Cleanup")
+            run_workflow_cleanup
             ;;
         "Stale Branch Pruning (coming soon)")
             gum style --foreground "$COLOR_BLUE" "This feature is planned! Check back later."
