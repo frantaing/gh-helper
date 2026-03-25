@@ -20,7 +20,7 @@ run_branch_pruning() {
         --cursor.foreground "$COLOR_BLUE" \
         --selected.foreground "$COLOR_BLUE")
 
-    if [ "$MODE" = "Cancel" ] ||[ -z "$MODE" ]; then clear; return; fi
+    if [ "$MODE" = "Cancel" ] || [ -z "$MODE" ]; then clear; return; fi
 
     local SELECTED_REPOS=""
 
@@ -73,7 +73,7 @@ run_branch_pruning() {
                 -- gh api "user/repos?per_page=100" --paginate --jq '.[].full_name' 2>/dev/null || true)
         fi
 
-        if[ -z "$REPOS_JSON" ]; then 
+        if [ -z "$REPOS_JSON" ]; then
             gum style --foreground "$COLOR_RED" "No repositories found or access denied."
             sleep 2
             clear; return
@@ -88,7 +88,7 @@ run_branch_pruning() {
             --cursor.foreground "$COLOR_BLUE" \
             --selected.foreground "$COLOR_BLUE")
         
-        if[ -z "$SELECTED_REPOS" ]; then
+        if [ -z "$SELECTED_REPOS" ]; then
             gum style --foreground "$COLOR_BLUE" "No repositories selected."
             sleep 2
             clear; return
@@ -123,19 +123,22 @@ run_branch_pruning() {
     gum style --foreground "$COLOR_BORDER" "Scanning selected repositories... (This may take a while for many repos)"
     
     local fetch_script=$(cat <<EOF
-    while IFS= read -r repo; do[ -z "\$repo" ] && continue
+    while IFS= read -r repo; do
+        [ -z "\$repo" ] && continue
         
         DEFAULT_BRANCH=\$(gh repo view "\$repo" --json defaultBranchRef -q '.defaultBranchRef.name' 2>/dev/null)
-        BRANCHES=\$(gh api "repos/\$repo/branches?per_page=100" --paginate --jq '.[].name' 2>/dev/null)[ -z "\$BRANCHES" ] && continue
+        BRANCHES=\$(gh api "repos/\$repo/branches?per_page=100" --paginate --jq '.[].name' 2>/dev/null)
+        [ -z "\$BRANCHES" ] && continue
 
         for branch in \$BRANCHES; do
-            if[ "\$branch" = "\$DEFAULT_BRANCH" ]; then continue; fi
+            if [ "\$branch" = "\$DEFAULT_BRANCH" ]; then continue; fi
 
-            commit_date=\$(gh api "repos/\$repo/commits/\$branch" --jq '.commit.committer.date' 2>/dev/null)[ -z "\$commit_date" ] && continue
+            commit_date=\$(gh api "repos/\$repo/commits/\$branch" --jq '.commit.committer.date' 2>/dev/null)
+            [ -z "\$commit_date" ] && continue
 
             commit_epoch=\$(date -d "\$commit_date" +%s 2>/dev/null || echo 0)
 
-            if[ "\$commit_epoch" -lt "$cutoff_epoch" ] && [ "\$commit_epoch" -gt 0 ]; then
+            if [ "\$commit_epoch" -lt "$cutoff_epoch" ] && [ "\$commit_epoch" -gt 0 ]; then
                 diff_seconds=\$(( $current_epoch - commit_epoch ))
                 days_ago=\$(( diff_seconds / 86400 ))
                 # Output format: repo|branch_name|days_ago|actual_date
@@ -149,7 +152,7 @@ EOF
     local STALE_BRANCHES
     STALE_BRANCHES=$(gum spin --spinner.foreground "$COLOR_BLUE" --spinner dot --title "Analyzing branch ages across repos..." -- bash -c "$fetch_script")
 
-    if[ -z "$STALE_BRANCHES" ]; then
+    if [ -z "$STALE_BRANCHES" ]; then
         gum style --foreground "$COLOR_GREEN" "Nice! No branches older than $THRESHOLD_DAYS days found in the selected repos."
         sleep 3
         clear
@@ -171,7 +174,7 @@ EOF
         --cursor.foreground "$COLOR_BLUE" \
         --selected.foreground "$COLOR_BLUE")
 
-    if[ -z "$selected_lines" ]; then
+    if [ -z "$selected_lines" ]; then
         gum style --foreground "$COLOR_BLUE" "No branches selected."
         sleep 2
         clear
