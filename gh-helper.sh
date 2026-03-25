@@ -8,7 +8,7 @@
 # Exit immediately if a command exits with a non-zero status.
 set -e
 
-# --- Colors and Styles ---
+# --- Colors & styles ---
 # Github palette
 COLOR_BLUE="#58a6ff"
 COLOR_GREEN="#3fb950"
@@ -23,7 +23,7 @@ source "$SCRIPT_DIR/modules/actions_cache.sh"
 source "$SCRIPT_DIR/modules/workflow_cleanup.sh"
 source "$SCRIPT_DIR/modules/branch_pruning.sh"
 
-# --- Dependency Checker ---
+# --- Dependency checker ---
 # Checks for required tools and offers to install them if missing.
 check_dependencies() {
     local missing_deps=()
@@ -67,23 +67,25 @@ check_dependencies() {
     fi
 }
 
-# --- Welcome Screen ---
+# --- Welcome screen ---
 display_welcome() {
     local title
     title=$(gum style --foreground "$COLOR_BLUE" "gh-helper")
 
     local subtitle="A TUI for doing Github things the website won't let you do."
+    local version="v1.0.0"
 
     gum style \
         --border double --border-foreground "$COLOR_BORDER" \
         --align center --width 50 --padding "1 2" \
         "$title" \
-        "$subtitle"
+        "$subtitle" \
+        "$version"
 
     echo ""
 }
 
-# --- Main Menu ---
+# --- Main menu ---
 display_main_menu() {
     local header_text
     header_text=$(gum style --bold --foreground "$COLOR_BLUE" "What would you like to do?")
@@ -138,7 +140,6 @@ main() {
         gum style --border normal --border-foreground "$COLOR_RED" --padding "1 2" \
             "You are not authenticated with the GitHub CLI."
         
-        # --- UPDATED COLORS HERE ---
         if gum confirm "Would you like to run 'gh auth login' now?" \
             --prompt.foreground "$COLOR_BLUE" \
             --selected.background "$COLOR_BLUE" \
