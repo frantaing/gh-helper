@@ -56,7 +56,7 @@ run_branch_pruning() {
     # Build an inline script for the spinner to execute. 
     # Escape variables like \$branch so they run inside the spinner, 
     # BUT let $REPO_NAME and $cutoff_epoch evaluate immediately.
-local fetch_script=$(cat <<'EOF'    
+local fetch_script=$(cat <<EOF    
     # Get the default branch so we don't accidentally suggest deleting it
     DEFAULT_BRANCH=\$(gh repo view "$REPO_NAME" --json defaultBranchRef -q '.defaultBranchRef.name' 2>/dev/null)
     
