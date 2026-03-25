@@ -16,7 +16,7 @@ run_branch_pruning() {
             --prompt "Enter the repository: " \
             --cursor.foreground "$COLOR_BLUE")
 
-        if[ -z "$REPO_NAME" ]; then clear; return; fi
+        if [ -z "$REPO_NAME" ]; then clear; return; fi
 
         if gh repo view "$REPO_NAME" &>/dev/null; then
             break
@@ -56,7 +56,7 @@ run_branch_pruning() {
     # Build an inline script for the spinner to execute. 
     # Escape variables like \$branch so they run inside the spinner, 
     # BUT let $REPO_NAME and $cutoff_epoch evaluate immediately.
-    local fetch_script=$(cat <<EOF
+local fetch_script=$(cat <<'EOF'    
     # Get the default branch so we don't accidentally suggest deleting it
     DEFAULT_BRANCH=\$(gh repo view "$REPO_NAME" --json defaultBranchRef -q '.defaultBranchRef.name' 2>/dev/null)
     
@@ -81,7 +81,7 @@ run_branch_pruning() {
         commit_epoch=\$(date -d "\$commit_date" +%s 2>/dev/null || echo 0)
 
         # Check if the commit is older than our cutoff date
-        if [ "\$commit_epoch" -lt "$cutoff_epoch" ] &&[ "\$commit_epoch" -gt 0 ]; then
+        if [ "\$commit_epoch" -lt "$cutoff_epoch" ] && [ "\$commit_epoch" -gt 0 ]; then
             diff_seconds=\$(( $current_epoch - commit_epoch ))
             days_ago=\$(( diff_seconds / 86400 ))
             # Output format: branch_name|days_ago|actual_date

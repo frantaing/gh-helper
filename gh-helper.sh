@@ -110,7 +110,7 @@ display_main_menu() {
         "Bulk Workflow Run Cleanup")
             run_workflow_cleanup
             ;;
-        "Stale Branch Pruning (coming soon)")
+        "Stale Branch Pruning")
             run_branch_pruning
             ;;
         "Quit")
