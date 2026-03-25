@@ -21,9 +21,9 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 source "$SCRIPT_DIR/modules/deployment_cleanup.sh"
 source "$SCRIPT_DIR/modules/actions_cache.sh"
 source "$SCRIPT_DIR/modules/workflow_cleanup.sh"
-# Add future modules here...
+source "$SCRIPT_DIR/modules/branch_pruning.sh"
 
-# --- FUNCTION: Dependency Checker ---
+# --- Dependency Checker ---
 # Checks for required tools and offers to install them if missing.
 check_dependencies() {
     local missing_deps=()
@@ -39,7 +39,6 @@ check_dependencies() {
         gum style --border normal --border-foreground "$COLOR_RED" --padding "1 2" \
             "Warning: Required tools are missing: ${missing_deps[*]}"
 
-        # --- UPDATED COLORS HERE ---
         if gum confirm "Would you like to try and install them now?" \
             --prompt.foreground "$COLOR_BLUE" \
             --selected.background "$COLOR_BLUE" \
@@ -68,7 +67,7 @@ check_dependencies() {
     fi
 }
 
-# --- FUNCTION: Welcome Screen ---
+# --- Welcome Screen ---
 display_welcome() {
     local title
     title=$(gum style --foreground "$COLOR_BLUE" "gh-helper")
@@ -81,10 +80,10 @@ display_welcome() {
         "$title" \
         "$subtitle"
 
-    echo "" # Add a newline for spacing
+    echo ""
 }
 
-# --- FUNCTION: Main Menu ---
+# --- Main Menu ---
 display_main_menu() {
     local header_text
     header_text=$(gum style --bold --foreground "$COLOR_BLUE" "What would you like to do?")
@@ -94,7 +93,7 @@ display_main_menu() {
         "Deployment Cleanup" \
         "Actions Cache Management" \
         "Bulk Workflow Run Cleanup" \
-        "Stale Branch Pruning (coming soon)" \
+        "Stale Branch Pruning" \
         "Quit" \
         --height 10 \
         --header "$header_text" \
@@ -112,8 +111,7 @@ display_main_menu() {
             run_workflow_cleanup
             ;;
         "Stale Branch Pruning (coming soon)")
-            gum style --foreground "$COLOR_BLUE" "This feature is planned! Check back later."
-            sleep 2
+            run_branch_pruning
             ;;
         "Quit")
             gum style --foreground "$COLOR_GREEN" "Goodbye!"
