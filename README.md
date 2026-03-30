@@ -2,16 +2,12 @@
 
 A TUI for managing GitHub repos from your terminal. Because some things just aren't possible through the web UI.
 
-> [!NOTE]
-> All initially planned features are now implemented!! 😁
+## Features
 
-## Roadmap
-
-- [x] Deployment cleanup
-- [x] Actions cache management
-- [x] Bulk workflow run cleanup
-- [x] Stale branch pruning (single repo)
-- [x] Stale branch pruning (across multiple repos)
+- Deployment cleanup
+- Actions cache management
+- Bulk workflow run cleanup
+- Stale branch pruning (single repo + across multiple repos)
 
 ## Installation
 
