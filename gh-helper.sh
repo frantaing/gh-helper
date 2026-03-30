@@ -36,8 +36,8 @@ check_dependencies() {
     done
 
     if [ ${#missing_deps[@]} -gt 0 ]; then
-        gum style --border normal --border-foreground "$COLOR_RED" --padding "1 2" \
-            "Warning: Required tools are missing: ${missing_deps[*]}"
+        if [ ${#missing_deps[@]} -gt 0 ]; then
+            echo "Warning: Required tools are missing: ${missing_deps[*]}" # Changed to `echo` -- in case `gum` is missing
 
         if gum confirm "Would you like to try and install them now?" \
             --prompt.foreground "$COLOR_BLUE" \
