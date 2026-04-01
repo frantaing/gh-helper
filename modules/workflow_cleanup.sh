@@ -25,7 +25,7 @@ run_workflow_cleanup() {
         fi
     done
 
-    # --- 2: Fetch and Filter Runs ---
+    # --- 2: Fetch and filter runs ---
     # Target 'failure' and 'cancelled' runs specifically.
     local get_runs_cmd="gh api 'repos/$REPO_NAME/actions/runs?per_page=100' --paginate --jq '.workflow_runs[] | select(.conclusion == \"failure\" or .conclusion == \"cancelled\") | .id' 2>/dev/null || true"
 
@@ -39,16 +39,42 @@ run_workflow_cleanup() {
         return
     fi
 
+    # --- 3: Fetch run details for display ---
+    # Need IDs, names, and dates for a useful selection list.
+    local get_details_cmd="gh api 'repos/$REPO_NAME/actions/runs?per_page=100' --paginate --jq '.workflow_runs[] | select(.conclusion == \"failure\" or .conclusion == \"cancelled\") | \"\(.id)|\(.name)|\(.conclusion)|\(.created_at)\"' 2>/dev/null || true"
+
+    local RUN_DETAILS
+    RUN_DETAILS=$(gum spin --spinner.foreground "$COLOR_BLUE" --spinner dot --title "Fetching run details..." -- bash -c "$get_details_cmd")
+
+    # Format for display: [ID] Workflow Name (conclusion) - date
+    local formatted_list
+    formatted_list=$(echo "$RUN_DETAILS" | awk -F'|' '{ printf "[%s] %s (%s) - %s\n", $1, $2, $3, $4 }')
+
+    # --- 4: Select runs to delete ---
+    echo
+    gum style --bold "Select runs to delete:"
+    gum style --foreground "$COLOR_BORDER" "(Space to select, 'a' to select all, Enter to confirm)"
+    echo
+
+    local selected_lines
+    selected_lines=$(echo "$formatted_list" | gum choose --no-limit --height 15 \
+        --cursor.foreground "$COLOR_BLUE" \
+        --selected.foreground "$COLOR_BLUE")
+
+    if [ -z "$selected_lines" ]; then
+        gum style --foreground "$COLOR_BLUE" "No runs selected."
+        sleep 1
+        clear
+        return
+    fi
+
+    # Extract IDs from selected lines
+    RUN_IDS=$(echo "$selected_lines" | sed 's/^\[\([0-9]*\)\].*/\1/')
     local COUNT
     COUNT=$(echo "$RUN_IDS" | wc -l | xargs)
 
-    # --- 3: Summary and Confirmation ---
+    # --- 5: Confirmation ---
     echo
-    gum style --padding "0 1" --border normal --border-foreground "#f8e45c" \
-        "Summary:" \
-        "Found $COUNT workflow runs with status 'failed' or 'cancelled'."
-    echo
-
     if ! gum confirm "Are you sure you want to PERMANENTLY delete these $COUNT runs?" \
         --prompt.bold \
         --prompt.foreground "" \
@@ -58,7 +84,7 @@ run_workflow_cleanup() {
         return
     fi
 
-    # --- 4: Deletion Loop ---
+    # --- 6: Deletion loop ---
     clear
     gum style --bold --foreground "$COLOR_BLUE" -- "--- Deleting Workflow Runs ---"
     echo
@@ -83,7 +109,7 @@ run_workflow_cleanup() {
     done <<< "$RUN_IDS"
     set -e
 
-    # --- 5: Success Screen ---
+    # --- 7: SUCCESS! ---
     echo
     local line1="✨ Process Complete! ✨"
     local line2
