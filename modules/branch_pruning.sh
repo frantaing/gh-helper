@@ -114,9 +114,12 @@ run_branch_pruning() {
         fi
     done
 
-    local current_epoch=$(date +%s)
-    local threshold_seconds=$((THRESHOLD_DAYS * 86400))
-    local cutoff_epoch=$((current_epoch - threshold_seconds))
+    local current_epoch
+    local threshold_seconds
+    local cutoff_epoch
+    current_epoch=$(date +%s)
+    threshold_seconds=$((THRESHOLD_DAYS * 86400))
+    cutoff_epoch=$((current_epoch - threshold_seconds))
 
     # --- 4: Fetch data & calculate staleness ---
     echo
