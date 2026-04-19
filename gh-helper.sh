@@ -73,7 +73,7 @@ display_welcome() {
     title=$(gum style --foreground "$COLOR_BLUE" "gh-helper")
 
     local subtitle="A TUI for doing Github things the website won't let you do."
-    local version="v1.0.0"
+    local version="v1.0.1"
 
     gum style \
         --border double --border-foreground "$COLOR_BORDER" \
