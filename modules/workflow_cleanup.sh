@@ -25,32 +25,25 @@ run_workflow_cleanup() {
         fi
     done
 
-    # --- 2: Fetch and filter runs ---
-    # Target 'failure' and 'cancelled' runs specifically.
-    local get_runs_cmd="gh api 'repos/$REPO_NAME/actions/runs?per_page=100' --paginate --jq '.workflow_runs[] | select(.conclusion == \"failure\" or .conclusion == \"cancelled\") | .id' 2>/dev/null || true"
+    # --- 2: Fetch and Filter Runs ---
+    # Single fetch for all required fields: ID, name, conclusion, and date.
+    local get_runs_cmd="gh api 'repos/$REPO_NAME/actions/runs?per_page=100' --paginate --jq '.workflow_runs[] | select(.conclusion == \"failure\" or .conclusion == \"cancelled\") | \"\(.id)|\(.name)|\(.conclusion)|\(.created_at)\"' 2>/dev/null || true"
 
-    local RUN_IDS
-    RUN_IDS=$(gum spin --spinner.foreground "$COLOR_BLUE" --spinner dot --title "Searching for failed/cancelled runs..." -- bash -c "$get_runs_cmd")
-
-    if [ -z "$RUN_IDS" ]; then
+    local RUN_DETAILS
+    RUN_DETAILS=$(gum spin --spinner.foreground "$COLOR_BLUE" --spinner dot --title "Searching for failed/cancelled runs..." -- bash -c "$get_runs_cmd")
+    
+    if [ -z "$RUN_DETAILS" ]; then
         gum style --foreground "$COLOR_GREEN" "No failed or cancelled workflow runs found for '$REPO_NAME'!"
         sleep 2
         clear
         return
     fi
 
-    # --- 3: Fetch run details for display ---
-    # Need IDs, names, and dates for a useful selection list.
-    local get_details_cmd="gh api 'repos/$REPO_NAME/actions/runs?per_page=100' --paginate --jq '.workflow_runs[] | select(.conclusion == \"failure\" or .conclusion == \"cancelled\") | \"\(.id)|\(.name)|\(.conclusion)|\(.created_at)\"' 2>/dev/null || true"
-
-    local RUN_DETAILS
-    RUN_DETAILS=$(gum spin --spinner.foreground "$COLOR_BLUE" --spinner dot --title "Fetching run details..." -- bash -c "$get_details_cmd")
-
+    # --- 3: Select runs to delete ---
     # Format for display: [ID] Workflow Name (conclusion) - date
     local formatted_list
     formatted_list=$(echo "$RUN_DETAILS" | awk -F'|' '{ printf "[%s] %s (%s) - %s\n", $1, $2, $3, $4 }')
 
-    # --- 4: Select runs to delete ---
     echo
     gum style --bold "Select runs to delete:"
     gum style --foreground "$COLOR_BORDER" "(Space to select, 'a' to select all, Enter to confirm)"
@@ -69,11 +62,12 @@ run_workflow_cleanup() {
     fi
 
     # Extract IDs from selected lines
+    local RUN_IDS
     RUN_IDS=$(echo "$selected_lines" | sed 's/^\[\([0-9]*\)\].*/\1/')
     local COUNT
     COUNT=$(echo "$RUN_IDS" | wc -l | xargs)
 
-    # --- 5: Confirmation ---
+    # --- 4: Confirmation ---
     echo
     if ! gum confirm "Are you sure you want to PERMANENTLY delete these $COUNT runs?" \
         --prompt.bold \
@@ -84,7 +78,7 @@ run_workflow_cleanup() {
         return
     fi
 
-    # --- 6: Deletion loop ---
+    # --- 5: Deletion loop ---
     clear
     gum style --bold --foreground "$COLOR_BLUE" -- "--- Deleting Workflow Runs ---"
     echo
@@ -109,7 +103,7 @@ run_workflow_cleanup() {
     done <<< "$RUN_IDS"
     set -e
 
-    # --- 7: SUCCESS! ---
+    # --- 6: SUCCESS! ---
     echo
     local line1="✨ Process Complete! ✨"
     local line2
