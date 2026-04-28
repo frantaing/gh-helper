@@ -31,7 +31,7 @@ run_workflow_cleanup() {
 
     local RUN_DETAILS
     RUN_DETAILS=$(gum spin --spinner.foreground "$COLOR_BLUE" --spinner dot --title "Searching for failed/cancelled runs..." -- bash -c "$get_runs_cmd")
-
+    
     if [ -z "$RUN_DETAILS" ]; then
         gum style --foreground "$COLOR_GREEN" "No failed or cancelled workflow runs found for '$REPO_NAME'!"
         sleep 2
@@ -40,6 +40,10 @@ run_workflow_cleanup() {
     fi
 
     # --- 3: Select runs to delete ---
+    # Format for display: [ID] Workflow Name (conclusion) - date
+    local formatted_list
+    formatted_list=$(echo "$RUN_DETAILS" | awk -F'|' '{ printf "[%s] %s (%s) - %s\n", $1, $2, $3, $4 }')
+
     echo
     gum style --bold "Select runs to delete:"
     gum style --foreground "$COLOR_BORDER" "(Space to select, 'a' to select all, Enter to confirm)"
