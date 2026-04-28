@@ -58,6 +58,7 @@ run_workflow_cleanup() {
     fi
 
     # Extract IDs from selected lines
+    local RUN_IDS
     RUN_IDS=$(echo "$selected_lines" | sed 's/^\[\([0-9]*\)\].*/\1/')
     local COUNT
     COUNT=$(echo "$RUN_IDS" | wc -l | xargs)
