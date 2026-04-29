@@ -48,13 +48,14 @@ run_branch_pruning() {
         ACCOUNT_TYPE=$(gum choose \
             "Personal Account" \
             "Organization" \
+            "Back" \
             --header "Fetch repositories from:" \
             --header.bold \
             --header.foreground "" \
             --cursor.foreground "$COLOR_BLUE" \
             --selected.foreground "$COLOR_BLUE")
         
-        if [ -z "$ACCOUNT_TYPE" ]; then clear; return; fi
+        if [ "$ACCOUNT_TYPE" = "Back" ] || [ -z "$ACCOUNT_TYPE" ]; then clear; return; fi
 
         local REPOS_JSON
         if [ "$ACCOUNT_TYPE" = "Organization" ]; then
