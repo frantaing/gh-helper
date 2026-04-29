@@ -50,7 +50,7 @@ run_deployment_cleanup() {
         if [ "$ENV_NAME" = "Back" ] || [ -z "$ENV_NAME" ]; then clear; return; fi
 
         # --- 3: Get deployments ---
-        local get_deployments_cmd="gh api 'repos/$REPO_NAME/deployments?per_page=100' --paginate --jq '.[] | select(.environment == \"$ENV_NAME\") | {id: .id, env: .environment, creator: .creator.login, created: .created_at}' 2>/dev/null || true"
+        local get_deployments_cmd="gh api 'repos/$REPO_NAME/deployments?per_page=100' --paginate --jq '.[] | select(.environment == \"$ENV_NAME\") | {id: .id, env: .environment, creator: .creator.login, created: .created_at, ref: .ref, sha: .sha}' 2>/dev/null || true"
 
         local DEPLOYMENTS_JSON
         DEPLOYMENTS_JSON=$(gum spin --spinner.foreground "$COLOR_BLUE" --spinner dot --title "Fetching deployments in '$ENV_NAME'..." -- bash -c "$get_deployments_cmd")
@@ -90,9 +90,9 @@ run_deployment_cleanup() {
     gum style --foreground "$COLOR_BORDER" "(Space to select, 'a' to select all, Enter to confirm)"
     echo
     
-    # Create formatted list for selection: [ID] Creator - Date
+    # Create formatted list for selection: [ID] creator • status • branch • short SHA - date
     local deployment_options
-    deployment_options=$(echo "$DEPLOYMENTS_JSON" | jq -r '"[\(.id)] \(.creator) - \(.created)"')
+    deployment_options=$(echo "$DEPLOYMENTS_JSON" | jq -r '"[\(.id)] \(.creator) • \(.ref) • \(.sha[0:7]) - \(.created)"')
     
     local selected_deployments
     selected_deployments=$(echo "$deployment_options" | gum choose --no-limit --height 15 \
