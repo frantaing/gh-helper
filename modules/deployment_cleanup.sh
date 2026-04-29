@@ -40,14 +40,14 @@ run_deployment_cleanup() {
         fi
 
         local ENV_NAME
-        ENV_NAME=$(echo "$ENV_NAMES" | gum choose \
+        ENV_NAME=$(echo -e "$ENV_NAMES\nBack" | gum choose \
             --header "Select an environment to clean" \
             --header.bold \
             --header.foreground "" \
             --cursor.foreground "$COLOR_BLUE" \
             --selected.foreground "$COLOR_BLUE")
 
-        if [ -z "$ENV_NAME" ]; then clear; return; fi
+        if [ "$ENV_NAME" = "Back" ] || [ -z "$ENV_NAME" ]; then clear; return; fi
 
         # --- 3: Get deployments ---
         local get_deployments_cmd="gh api 'repos/$REPO_NAME/deployments?per_page=100' --paginate --jq '.[] | select(.environment == \"$ENV_NAME\") | {id: .id, env: .environment, creator: .creator.login, created: .created_at}' 2>/dev/null || true"
