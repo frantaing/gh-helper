@@ -13,14 +13,14 @@ run_branch_pruning() {
     MODE=$(gum choose \
         "Single Repository" \
         "Multiple Repositories" \
-        "Cancel" \
+        "Back" \
         --header "Prune branches in:" \
         --header.bold \
         --header.foreground "" \
         --cursor.foreground "$COLOR_BLUE" \
         --selected.foreground "$COLOR_BLUE")
 
-    if [ "$MODE" = "Cancel" ] || [ -z "$MODE" ]; then clear; return; fi
+    if [ "$MODE" = "Back" ] || [ -z "$MODE" ]; then clear; return; fi
 
     local SELECTED_REPOS=""
 
