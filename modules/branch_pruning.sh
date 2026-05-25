@@ -193,7 +193,7 @@ EOF
 
     # --- 6: Confirm deletion ---
     echo
-    if ! gum confirm "You are about to PERMANENTLY delete $COUNT branch(es). Proceed?" \
+    if ! gum confirm "You are about to PERMANENTLY delete $COUNT branch(es) across the selected repos. Proceed?" \
         --prompt.bold \
         --prompt.foreground "" \
         --selected.background "$COLOR_BLUE" \
