@@ -69,7 +69,7 @@ run_workflow_cleanup() {
 
     # --- 4: Confirmation ---
     echo
-    if ! gum confirm "Are you sure you want to PERMANENTLY delete these $COUNT runs?" \
+    if ! gum confirm "Are you sure you want to PERMANENTLY delete these $COUNT runs from '$REPO_NAME'?" \
         --prompt.bold \
         --prompt.foreground "" \
         --selected.background "$COLOR_BLUE" \

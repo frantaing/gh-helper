@@ -79,7 +79,7 @@ run_actions_cache() {
 
     # --- 5: Confirmation ---
     echo
-    if ! gum confirm "You are about to delete $COUNT cache(s). This cannot be undone. Proceed?" \
+    if ! gum confirm "You are about to delete $COUNT cache(s) from '$REPO_NAME'. This cannot be undone. Proceed?" \
         --prompt.bold \
         --prompt.foreground "" \
         --selected.background "$COLOR_BLUE" \
