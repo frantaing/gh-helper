@@ -114,7 +114,7 @@ run_deployment_cleanup() {
 
     # --- 5: CONFIRM DELETION ---
     echo
-    if ! gum confirm "You are about to PERMANENTLY delete ${SELECTED_COUNT} deployment(s) from \"${ENV_NAME}\". Proceed?" \
+    if ! gum confirm "You are about to PERMANENTLY delete ${SELECTED_COUNT} deployment(s) from '${REPO_NAME}/${ENV_NAME}'. Proceed?" \
         --prompt.bold \
         --prompt.foreground "" \
         --selected.background "$COLOR_BLUE" \
