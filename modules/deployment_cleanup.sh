@@ -96,6 +96,7 @@ run_deployment_cleanup() {
     
     local selected_deployments
     selected_deployments=$(echo "$deployment_options" | gum choose --no-limit --height 15 \
+        --header "" \
         --cursor.foreground "$COLOR_BLUE" \
         --selected.foreground "$COLOR_BLUE")
     
