@@ -86,6 +86,7 @@ run_branch_pruning() {
         echo
         
         SELECTED_REPOS=$(echo "$REPOS_JSON" | gum choose --no-limit --height 15 \
+            --header "" \
             --cursor.foreground "$COLOR_BLUE" \
             --selected.foreground "$COLOR_BLUE")
         
@@ -175,6 +176,7 @@ EOF
 
     local selected_lines
     selected_lines=$(echo "$formatted_list" | gum choose --no-limit --height 15 \
+        --header "" \
         --cursor.foreground "$COLOR_BLUE" \
         --selected.foreground "$COLOR_BLUE")
 
