@@ -176,7 +176,7 @@ run_deployment_cleanup() {
     echo
     local line1="✨ Process Complete! ✨"
     local line2
-    line2=$(gum style --foreground "$COLOR_GREEN" "Deleted ${deleted_count} of ${SELECTED_COUNT} deployments from '${ENV_NAME}'.")
+    line2=$(gum style --foreground "$COLOR_GREEN" "Deleted ${deleted_count} of ${SELECTED_COUNT} deployments from '${REPO_NAME}/${ENV_NAME}'.")
     
     gum style --padding "1 2" --border normal --border-foreground "$COLOR_GREEN" \
         "$line1" "$line2"
