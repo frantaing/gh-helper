@@ -237,9 +237,11 @@ EOF
     local line1="✨ Process Complete! ✨"
     local line2
     line2=$(gum style --foreground "$COLOR_GREEN" "Deleted $deleted_count of $COUNT stale branches.")
+    local line3
+    line3=$(gum style --foreground "$COLOR_BORDER" "across the selected repos.")
 
     gum style --padding "1 2" --border normal --border-foreground "$COLOR_GREEN" \
-        "$line1" "$line2"
+        "$line1" "$line2" "$line3"
 
     echo
     echo "(Press any key to return to the main menu.)"

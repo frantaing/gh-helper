@@ -129,7 +129,7 @@ run_actions_cache() {
     echo
     local line1="✨ Process Complete! ✨"
     local line2
-    line2=$(gum style --foreground "$COLOR_GREEN" "Deleted $deleted_count of $COUNT caches.")
+    line2=$(gum style --foreground "$COLOR_GREEN" "Deleted $deleted_count of $COUNT caches from '$REPO_NAME'.")
 
     gum style --padding "1 2" --border normal --border-foreground "$COLOR_GREEN" \
         "$line1" \
