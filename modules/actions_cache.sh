@@ -99,7 +99,9 @@ run_actions_cache() {
 
     local i=0
     local deleted_count=0
-    
+    local deleted_keys=""
+    local failed_ids=""
+
     # Read IDs line by line
     while IFS= read -r id; do
         # Skip empty lines
@@ -108,6 +110,11 @@ run_actions_cache() {
         [ -z "$id" ] && continue
 
         ((i++))
+
+        # Look up the key for this ID from the original selection
+        local cache_key
+        cache_key=$(echo "$selected_lines" | grep "^\[$id\]" | sed "s/^\[$id\] \([^ ]*\).*/\1/")
+
         echo "$(gum style --foreground "$COLOR_BLUE" "•") Deleting cache $i of $COUNT (ID: $id)..."
         
         # Try to delete
@@ -117,8 +124,10 @@ run_actions_cache() {
         if [ $delete_result -eq 0 ]; then
             echo "  $(gum style --foreground "$COLOR_GREEN" "✔") Successfully deleted."
             ((deleted_count++))
+            deleted_keys="${deleted_keys}\n  $(gum style --foreground "$COLOR_GREEN" "✔") ${cache_key}"
         else
             echo "  $(gum style --foreground "$COLOR_RED" "✖") Failed to delete ID: $id"
+            failed_ids="${failed_ids}\n  $(gum style --foreground "$COLOR_RED" "✖") ID: $id"
         fi
     done <<< "$SELECTED_IDS"
 
@@ -134,6 +143,18 @@ run_actions_cache() {
     gum style --padding "1 2" --border normal --border-foreground "$COLOR_GREEN" \
         "$line1" \
         "$line2"
+
+    if [ -n "$deleted_keys" ]; then
+        echo
+        gum style --bold "Deleted:"
+        echo -e "$deleted_keys"
+    fi
+
+    if [ -n "$failed_ids" ]; then
+        echo
+        gum style --bold --foreground "$COLOR_RED" "Failed:"
+        echo -e "$failed_ids"
+    fi
 
     echo
     echo "(Press any key to return to the main menu.)"
