@@ -133,15 +133,20 @@ run_deployment_cleanup() {
     
     local i=0
     local deleted_count=0
-    
+    local deleted_deployments=""
+    local failed_ids=""
+
     while IFS= read -r id; do
-        # Skip empty lines
         [ -z "$id" ] && continue
-        # Skip if id is just whitespace
         id=$(echo "$id" | xargs)
         [ -z "$id" ] && continue
 
         ((i++))
+
+        # Look up the ref + sha for this ID from the original selection
+        local deploy_label
+        deploy_label=$(echo "$selected_deployments" | grep "^\[$id\]" | sed "s/^\[$id\] //")
+
         echo "$(gum style --foreground "$COLOR_BLUE" "•") Processing deployment $i of $SELECTED_COUNT (ID: $id)..."
 
         # Try to delete directly first
@@ -151,6 +156,7 @@ run_deployment_cleanup() {
         if [ $delete_result -eq 0 ]; then
             echo "  $(gum style --foreground "$COLOR_GREEN" "✔") Successfully deleted."
             ((deleted_count++))
+            deleted_deployments="${deleted_deployments}\n  $(gum style --foreground "$COLOR_GREEN" "✔") ${deploy_label}"
         else
             # Mark inactive then delete
             echo "  $(gum style --foreground "#f8e45c" "…") Active deployment. Marking 'inactive'..."
@@ -162,10 +168,12 @@ run_deployment_cleanup() {
             delete_result=$?
             
             if [ $delete_result -eq 0 ]; then
-                 echo "  $(gum style --foreground "$COLOR_GREEN" "✔") Successfully deleted."
-                 ((deleted_count++))
+                echo "  $(gum style --foreground "$COLOR_GREEN" "✔") Successfully deleted."
+                ((deleted_count++))
+                deleted_deployments="${deleted_deployments}\n  $(gum style --foreground "$COLOR_GREEN" "✔") ${deploy_label}"
             else
-                 echo "  $(gum style --foreground "$COLOR_RED" "✖") FAILED to delete ID: $id."
+                echo "  $(gum style --foreground "$COLOR_RED" "✖") FAILED to delete ID: $id."
+                failed_ids="${failed_ids}\n  $(gum style --foreground "$COLOR_RED" "✖") ID: $id"
             fi
         fi
     done <<< "$SELECTED_IDS"
@@ -180,6 +188,18 @@ run_deployment_cleanup() {
     
     gum style --padding "1 2" --border normal --border-foreground "$COLOR_GREEN" \
         "$line1" "$line2"
+
+    if [ -n "$deleted_deployments" ]; then
+        echo
+        gum style --bold "Deleted:"
+        echo -e "$deleted_deployments"
+    fi
+
+    if [ -n "$failed_ids" ]; then
+        echo
+        gum style --bold --foreground "$COLOR_RED" "Failed:"
+        echo -e "$failed_ids"
+    fi
 
     echo
     echo "(Press any key to return to the main menu.)"
