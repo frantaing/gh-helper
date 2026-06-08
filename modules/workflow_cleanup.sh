@@ -85,21 +85,31 @@ run_workflow_cleanup() {
     echo
 
     set +e
+    
     local i=0
     local deleted_count=0
-    
+    local deleted_runs=""
+    local failed_ids=""
+
     while IFS= read -r id; do
         [ -z "$id" ] && continue
         id=$(echo "$id" | xargs)
         [ -z "$id" ] && continue
 
         ((i++))
+
+        # Look up the run name for this ID from the original selection
+        local run_name
+        run_name=$(echo "$selected_lines" | grep "^\[$id\]" | sed "s/^\[$id\] \(.*\) ([a-z]*) -.*/\1/")
+
         echo "$(gum style --foreground "$COLOR_BLUE" "•") Deleting run $i of $COUNT (ID: $id)..."
         
         if gh api --method DELETE "repos/$REPO_NAME/actions/runs/$id" --silent 2>/dev/null; then
             ((deleted_count++))
+            deleted_runs="${deleted_runs}\n  $(gum style --foreground "$COLOR_GREEN" "✔") ${run_name} (${id})"
         else
             echo "  $(gum style --foreground "$COLOR_RED" "✖") Failed to delete ID: $id"
+            failed_ids="${failed_ids}\n  $(gum style --foreground "$COLOR_RED" "✖") ID: $id"
         fi
     done <<< "$RUN_IDS"
     set -e
@@ -108,11 +118,23 @@ run_workflow_cleanup() {
     echo
     local line1="✨ Process Complete! ✨"
     local line2
-    line2=$(gum style --foreground "$COLOR_GREEN" "Successfully deleted $deleted_count workflow runs from '$REPO_NAME'.")
+    line2=$(gum style --foreground "$COLOR_GREEN" "Successfully deleted $deleted_count of $COUNT workflow runs from '$REPO_NAME'.")
 
     gum style --padding "1 2" --border normal --border-foreground "$COLOR_GREEN" \
         "$line1" \
         "$line2"
+
+    if [ -n "$deleted_runs" ]; then
+        echo
+        gum style --bold "Deleted:"
+        echo -e "$deleted_runs"
+    fi
+
+    if [ -n "$failed_ids" ]; then
+        echo
+        gum style --bold --foreground "$COLOR_RED" "Failed:"
+        echo -e "$failed_ids"
+    fi
 
     echo
     echo "(Press any key to return to the main menu.)"

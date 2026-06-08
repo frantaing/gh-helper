@@ -210,8 +210,11 @@ EOF
     echo
 
     set +e
+    
     local i=0
     local deleted_count=0
+    local deleted_branches=""
+    local failed_branches=""
 
     while IFS= read -r target; do
         [ -z "$target" ] && continue
@@ -226,8 +229,10 @@ EOF
         if gh api --method DELETE "repos/$repo_name/git/refs/heads/$branch_name" --silent 2>/dev/null; then
             echo "  $(gum style --foreground "$COLOR_GREEN" "✔") Successfully deleted."
             ((deleted_count++))
+            deleted_branches="${deleted_branches}\n  $(gum style --foreground "$COLOR_GREEN" "✔") ${repo_name}:${branch_name}"
         else
             echo "  $(gum style --foreground "$COLOR_RED" "✖") Failed to delete branch."
+            failed_branches="${failed_branches}\n  $(gum style --foreground "$COLOR_RED" "✖") ${repo_name}:${branch_name}"
         fi
     done <<< "$TARGETS"
     set -e
@@ -242,6 +247,18 @@ EOF
 
     gum style --padding "1 2" --border normal --border-foreground "$COLOR_GREEN" \
         "$line1" "$line2" "$line3"
+
+    if [ -n "$deleted_branches" ]; then
+        echo
+        gum style --bold "Deleted:"
+        echo -e "$deleted_branches"
+    fi
+
+    if [ -n "$failed_branches" ]; then
+        echo
+        gum style --bold --foreground "$COLOR_RED" "Failed:"
+        echo -e "$failed_branches"
+    fi
 
     echo
     echo "(Press any key to return to the main menu.)"
