@@ -149,12 +149,20 @@ display_main_menu() {
     local header_text
     header_text=$(gum style --bold --foreground "$COLOR_BLUE" "What would you like to do?")
 
+    # Show active repo as subtitle if set
+    if [ -n "$DEFAULT_REPO" ]; then
+        local repo_text
+        repo_text=$(gum style --foreground "$COLOR_BORDER" "Active repo: $DEFAULT_REPO")
+        echo "$repo_text"
+    fi
+
     local choice
     choice=$(gum choose \
         "Deployment Cleanup" \
         "Actions Cache Management" \
         "Bulk Workflow Run Cleanup" \
         "Stale Branch Pruning" \
+        "Change Repository" \
         "Quit" \
         --height 10 \
         --header "$header_text" \
@@ -173,6 +181,9 @@ display_main_menu() {
             ;;
         "Stale Branch Pruning")
             run_branch_pruning
+            ;;
+        "Change Repository")
+            change_repo
             ;;
         "Quit")
             gum style --foreground "$COLOR_GREEN" "Goodbye!"
