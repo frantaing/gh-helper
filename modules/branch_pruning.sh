@@ -26,22 +26,29 @@ run_branch_pruning() {
 
     # --- 2: Get repo(s) ---
     if [ "$MODE" = "Single Repository" ]; then
-        while true; do
-            local REPO_NAME
-            REPO_NAME=$(gum input --placeholder "owner/repo" \
-                --prompt.bold \
-                --prompt "Enter the repository: " \
-                --cursor.foreground "$COLOR_BLUE")
+        if [ -n "$DEFAULT_REPO" ]; then
+            # Use the session default, show a confirmation line
+            gum style --foreground "$COLOR_BORDER" "Working on: $DEFAULT_REPO"
+            echo
+            SELECTED_REPOS="$DEFAULT_REPO"
+        else
+            while true; do
+                local REPO_NAME
+                REPO_NAME=$(gum input --placeholder "owner/repo" \
+                    --prompt.bold \
+                    --prompt "Enter the repository: " \
+                    --cursor.foreground "$COLOR_BLUE")
 
-            if [ -z "$REPO_NAME" ]; then clear; return; fi
+                if [ -z "$REPO_NAME" ]; then clear; return; fi
 
-            if gh repo view "$REPO_NAME" &>/dev/null; then
-                SELECTED_REPOS="$REPO_NAME"
-                break
-            else
-                gum style --foreground "$COLOR_RED" "Error: Repository '$REPO_NAME' not found or you don't have access."
-            fi
-        done
+                if gh repo view "$REPO_NAME" &>/dev/null; then
+                    SELECTED_REPOS="$REPO_NAME"
+                    break
+                else
+                    gum style --foreground "$COLOR_RED" "Error: Repository '$REPO_NAME' not found or you don't have access."
+                fi
+            done
+        fi
     else
         # Multiple repositories flow
         local ACCOUNT_TYPE

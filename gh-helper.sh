@@ -23,6 +23,10 @@ source "$SCRIPT_DIR/modules/actions_cache.sh"
 source "$SCRIPT_DIR/modules/workflow_cleanup.sh"
 source "$SCRIPT_DIR/modules/branch_pruning.sh"
 
+# --- Session state ---
+# Global default repo for this session. Empty if not set.
+DEFAULT_REPO=""
+
 # --- Dependency checker ---
 # Checks for required tools and offers to install them if missing.
 check_dependencies() {
@@ -85,10 +89,72 @@ display_welcome() {
     echo ""
 }
 
+# --- Default repo prompt ---
+# Runs once on launch. Sets the global DEFAULT_REPO for the session.
+prompt_default_repo() {
+    echo
+    local input
+    input=$(gum input \
+        --placeholder "owner/repo (or press Enter to skip)" \
+        --prompt "Enter a default repository for this session: " \
+        --prompt.bold \
+        --cursor.foreground "$COLOR_BLUE")
+
+    # User skipped — no default repo this session
+    if [ -z "$input" ]; then
+        return
+    fi
+
+    # Validate the repo
+    if gh repo view "$input" &>/dev/null; then
+        DEFAULT_REPO="$input"
+        gum style --foreground "$COLOR_GREEN" "✔ Default repo set to '$DEFAULT_REPO'."
+        echo
+    else
+        gum style --foreground "$COLOR_RED" "Repository '$input' not found or you don't have access. No default set."
+        echo
+    fi
+}
+
+# --- Change repo ---
+# Re-prompts for a default repo. Called from the main menu.
+change_repo() {
+    echo
+    local input
+    input=$(gum input \
+        --placeholder "owner/repo (or press Enter to clear)" \
+        --prompt "Enter a new default repository: " \
+        --prompt.bold \
+        --cursor.foreground "$COLOR_BLUE")
+
+    if [ -z "$input" ]; then
+        DEFAULT_REPO=""
+        gum style --foreground "$COLOR_BLUE" "Default repo cleared."
+        echo
+        return
+    fi
+
+    if gh repo view "$input" &>/dev/null; then
+        DEFAULT_REPO="$input"
+        gum style --foreground "$COLOR_GREEN" "✔ Default repo updated to '$DEFAULT_REPO'."
+        echo
+    else
+        gum style --foreground "$COLOR_RED" "Repository '$input' not found or you don't have access. Default repo unchanged."
+        echo
+    fi
+}
+
 # --- Main menu ---
 display_main_menu() {
     local header_text
     header_text=$(gum style --bold --foreground "$COLOR_BLUE" "What would you like to do?")
+
+    # Show active repo as subtitle if set
+    if [ -n "$DEFAULT_REPO" ]; then
+        local repo_text
+        repo_text=$(gum style --foreground "$COLOR_BORDER" "Active repo: $DEFAULT_REPO")
+        echo "$repo_text"
+    fi
 
     local choice
     choice=$(gum choose \
@@ -96,6 +162,7 @@ display_main_menu() {
         "Actions Cache Management" \
         "Bulk Workflow Run Cleanup" \
         "Stale Branch Pruning" \
+        "Change Repository" \
         "Quit" \
         --height 10 \
         --header "$header_text" \
@@ -115,6 +182,9 @@ display_main_menu() {
         "Stale Branch Pruning")
             run_branch_pruning
             ;;
+        "Change Repository")
+            change_repo
+            ;;
         "Quit")
             gum style --foreground "$COLOR_GREEN" "Goodbye!"
             exit 0
@@ -123,14 +193,12 @@ display_main_menu() {
 }
 
 # --- Main ---
-#
 #   1. Clears the screen first
 #   2. Checks if all required tools are installed
 #   3. Checks if the user is authenticated with gh
 #       3.5. If not, => `gh auth login`
 #   4. Once logged in, show welcome screen
 #   5. Loop the main menu until user quits
-#
 main() {
     clear 
     
@@ -152,6 +220,7 @@ main() {
     fi
 
     display_welcome
+    prompt_default_repo
 
     while true; do
         display_main_menu

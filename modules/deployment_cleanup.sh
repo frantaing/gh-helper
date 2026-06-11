@@ -10,20 +10,27 @@ run_deployment_cleanup() {
 
     # --- 1: Get the repo ---
     local REPO_NAME
-    while true; do
-        REPO_NAME=$(gum input --placeholder "owner/repo" \
-            --prompt.bold \
-            --prompt "Enter the repository to clean: " \
-            --cursor.foreground "$COLOR_BLUE")
+    if [ -n "$DEFAULT_REPO" ]; then
+        # Use the session default, show a confirmation line
+        REPO_NAME="$DEFAULT_REPO"
+        gum style --foreground "$COLOR_BORDER" "Working on: $REPO_NAME"
+        echo
+    else
+        while true; do
+            REPO_NAME=$(gum input --placeholder "owner/repo" \
+                --prompt.bold \
+                --prompt "Enter the repository to clean: " \
+                --cursor.foreground "$COLOR_BLUE")
 
-        if [ -z "$REPO_NAME" ]; then clear; return; fi
+            if [ -z "$REPO_NAME" ]; then clear; return; fi
 
-        if gh repo view "$REPO_NAME" &>/dev/null; then
-            break
-        else
-            gum style --foreground "$COLOR_RED" "Error: Repository '$REPO_NAME' not found or you don't have access. Please try again."
-        fi
-    done
+            if gh repo view "$REPO_NAME" &>/dev/null; then
+                break
+            else
+                gum style --foreground "$COLOR_RED" "Error: Repository '$REPO_NAME' not found or you don't have access. Please try again."
+            fi
+        done
+    fi
 
     # --- 2: Select an environment ---
     while true; do
